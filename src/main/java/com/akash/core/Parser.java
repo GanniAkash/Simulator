@@ -15,12 +15,13 @@ public class Parser {
                 int lineLen = Integer.parseInt(word.substring(0, 2), 16)/2;
                 String rw = word.substring(6, 8);
                 int addrVal = Integer.parseInt(upperAddrString+word.substring(2, 6), 16)/2;
+                if(addrVal > 256) continue;
                 switch (rw) {
                     case "00":{
                         for (int i = 0; i < lineLen; i++) {
                             int j = 4 * i;
                             int opcode = Integer.parseInt(word.substring(10 + j, 12 + j) + word.substring(8 + j, 10 + j), 16);
-                            mem.setOpCode((short) (addrVal + i), opcode);
+                            mem.setInstruction((short) (addrVal + i), opcode);
                         }
                         break;
                     }

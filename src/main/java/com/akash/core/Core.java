@@ -8,7 +8,7 @@ public class Core {
     public boolean isRunning;
     public boolean isLoaded;
 
-    Core () {
+    public Core () {
         mem = new Memory();
         pc = 0;
         clk = 0;

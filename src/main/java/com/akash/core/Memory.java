@@ -5,8 +5,12 @@ public class Memory {
     private final short[] data_mem;
     private final short[] stack;
 
+    private final int bit12_mask = 0b1111_1111_1111;
+
+    private final int bit8_mask = 0b1111_1111;
+
     public enum SFR {
-        INDF(1), TMR0(2), PCL(3), STATUS(4), FSR(5),
+        INDF(0), TMR0(1), PCL(2), STATUS(3), FSR(4),
         OSCCAL(5), GPIO(6), TRISGPIO(32), OPTION(33);
 
         public final int val;
@@ -32,25 +36,27 @@ public class Memory {
         data_mem[SFR.OPTION.val] = 0b0000_1111;
     }
 
-    public int fetchOpCode(short addr) {
-        return program_mem[addr] & 0b1111_1111_1111;
+    public int fetchInstruction(short addr) {
+
+        return (program_mem[addr] & bit12_mask);
     }
 
-    public void setOpCode(short addr, int inst) {
-        program_mem[addr] = inst & 0b1111_1111_111;
+    public void setInstruction(short addr, int inst) {
+
+        program_mem[(addr & bit8_mask)] = (inst & bit12_mask);
     }
 
     public short fetchData(short addr) throws IndexOutOfBoundsException {
         if((addr <= 0x0f && addr >= 0x07) || addr > 0x1f) throw new IndexOutOfBoundsException();
         else {
-            return (short) (data_mem[addr] & 0b1111_1111);
+            return (short) (data_mem[(addr & bit8_mask)] & bit8_mask);
         }
     }
 
     public void setData(short addr, short data) throws IndexOutOfBoundsException {
         if((addr <= 0x0f && addr >= 0x07) || addr > 0x1f) throw new IndexOutOfBoundsException();
         else {
-            data_mem[addr & 255] = (short) (data & 255);
+            data_mem[(addr & bit8_mask)] = (short) (data & bit8_mask);
         }
     }
 
@@ -65,6 +71,7 @@ public class Memory {
     }
 
     public void push(short pc) {
+        pc = (short) (pc & bit8_mask);
         short temp = stack[0];
         stack[1] = temp;
         stack[0] = pc;
@@ -74,6 +81,6 @@ public class Memory {
         short temp = stack[0];
         stack[0] = stack[1];
         stack[1] = 0;
-        return (short) (temp & 255);
+        return (short) (temp & bit8_mask);
     }
 }
