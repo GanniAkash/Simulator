@@ -5,4 +5,5 @@ module com.akash {
 
     opens com.akash to javafx.fxml;
     exports com.akash;
+    exports com.akash.core;
 }

@@ -4,7 +4,6 @@ public class Executor {
     private static final int bit8_mask = 0b1111_1111;
     public static void execute(Instruction ins, Core core) {
         Instruction.OpCode op = ins.getOpCode();
-
         switch (op) {
             case ADDWF: {
                 short f = (short) (ins.getArgs()[0] & 255);
@@ -34,7 +33,7 @@ public class Executor {
                 int b = ins.getArgs()[1];
                 short temp = core.mem.fetchData(f);
                 int bit_mask = (0b01 << b);
-                core.mem.setInstruction(f, (short) (temp | bit_mask));
+                core.mem.setData(f, (short) (temp | bit_mask));
                 break;
             }
             case BTFSC: {
@@ -89,6 +88,7 @@ public class Executor {
                 short tempAddr = (short) (core.pc + 1);
                 core.mem.push(tempAddr);
                 core.pc = (short) ((k-1) & bit8_mask);
+                break;
             }
             case CLRF: {
                 short f = ins.getArgs()[0];
@@ -133,7 +133,7 @@ public class Executor {
                     core.mem.setData(f, res);
                 }
                 if (res == 0) {
-                    Executor.execute(new Instruction(Instruction.OpCode.NOP), core);
+                    core.pc = (short) ((core.pc + 1) &bit8_mask);
                 }
                 break;
             }
@@ -166,7 +166,7 @@ public class Executor {
                 break;
             }
             case GOTO: {
-                core.pc = ins.getArgs()[0];
+                core.pc = (short) (ins.getArgs()[0]-1);
                 break;
             }
             case IORLW: {
@@ -217,7 +217,7 @@ public class Executor {
             }
             case RETLW: {
                 core.WReg = ins.getArgs()[0];
-                core.pc = core.mem.pop();
+                core.pc = (short) (core.mem.pop() - 1);
                 break;
             }
             case RLF: {
@@ -226,10 +226,10 @@ public class Executor {
                 short temp = core.mem.fetchData(f);
                 short prev = (short) ((core.mem.fetchData((short) Memory.SFR.STATUS.val) & 0b100) >> 2);
                 if(((temp & 0b1000_0000) >> 7) == 0) {
-                    core.mem.clearStatusBit(2);
+                    core.mem.clearStatusBit(0);
                 }
                 else {
-                    core.mem.setStatusBit(2);
+                    core.mem.setStatusBit(0);
                 }
                 temp = (short) (((temp << 1) | (prev)) & bit8_mask);
                 if (d == 0) {
@@ -246,10 +246,10 @@ public class Executor {
                 short temp = core.mem.fetchData(f);
                 short prev = (short) ((core.mem.fetchData((short) Memory.SFR.STATUS.val) & 0b100) >> 2);
                 if(((temp & 0b1)) == 0) {
-                    core.mem.clearStatusBit(2);
+                    core.mem.clearStatusBit(0);
                 }
                 else {
-                    core.mem.setStatusBit(2);
+                    core.mem.setStatusBit(0);
                 }
                 temp = (short) (((temp >> 1) | (prev << 7)) & bit8_mask);
                 if (d == 0) {
@@ -314,8 +314,11 @@ public class Executor {
                 core.WReg = res;
                 break;
             }
+            case CLRWDT:
+            case SLEEP:
             default: break;
         }
+        if(core.pc + 1 > 255) core.isLoaded = false;
         core.pc = (short) ((core.pc + 1) & bit8_mask);
     }
 

@@ -1,23 +1,31 @@
 package com.akash.core;
 
 public class Core {
-    protected short pc;
-    protected short WReg;
+    public short pc;
+    public short WReg;
     protected int clk;
-    protected Memory mem;
+    public Memory mem;
     public boolean isRunning;
     public boolean isLoaded;
 
     public Core () {
         mem = new Memory();
-        pc = 0;
+        pc = 0x0;
         clk = 0;
         isRunning = false;
         isLoaded = false;
     }
 
     public void load(String pathToHex) {
-        Parser.parse(pathToHex, mem);
+        pc = Parser.parse(pathToHex, mem);
         isLoaded = true;
+    }
+
+    public void step() {
+        Instruction instruction = InstructionDecoder.decode(mem.fetchInstruction(pc));
+        Executor.execute(instruction, this);
+        if(pc > 255) {
+            pc = (short) (pc & 0b1111_1111);
+        }
     }
 }

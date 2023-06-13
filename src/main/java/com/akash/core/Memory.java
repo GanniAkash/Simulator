@@ -18,6 +18,33 @@ public class Memory {
         SFR(int val) {
             this.val = val;
         }
+
+        public static SFR getSFR(int val) {
+            switch (val) {
+                case 0: {
+                    return INDF;
+                }
+                case 1: {
+                    return TMR0;
+                }
+                case 2: {
+                    return PCL;
+                }
+                case 3: {
+                    return STATUS;
+                }
+                case 4: {
+                    return FSR;
+                }
+                case 5: {
+                    return OSCCAL;
+                }
+                case 6: {
+                    return GPIO;
+                }
+            }
+            throw new IllegalArgumentException();
+        }
     }
 
     Memory () {
@@ -47,14 +74,14 @@ public class Memory {
     }
 
     public short fetchData(short addr) throws IndexOutOfBoundsException {
-        if((addr <= 0x0f && addr >= 0x07) || addr > 0x1f) throw new IndexOutOfBoundsException();
+        if(((addr <= 0x0f && addr >= 0x07) || addr > 0x1f) && (addr != 32) && (addr != 33)) throw new IndexOutOfBoundsException();
         else {
             return (short) (data_mem[(addr & bit8_mask)] & bit8_mask);
         }
     }
 
     public void setData(short addr, short data) throws IndexOutOfBoundsException {
-        if((addr <= 0x0f && addr >= 0x07) || addr > 0x1f) throw new IndexOutOfBoundsException();
+        if(((addr <= 0x0f && addr >= 0x07) || addr > 0x1f) && (addr != 32) && (addr != 33)) throw new IndexOutOfBoundsException();
         else {
             data_mem[(addr & bit8_mask)] = (short) (data & bit8_mask);
         }
@@ -71,7 +98,6 @@ public class Memory {
     }
 
     public void push(short pc) {
-        pc = (short) (pc & bit8_mask);
         short temp = stack[0];
         stack[1] = temp;
         stack[0] = pc;
@@ -81,6 +107,6 @@ public class Memory {
         short temp = stack[0];
         stack[0] = stack[1];
         stack[1] = 0;
-        return (short) (temp & bit8_mask);
+        return temp;
     }
 }
