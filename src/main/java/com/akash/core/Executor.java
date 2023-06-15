@@ -318,8 +318,9 @@ public class Executor {
             case SLEEP:
             default: break;
         }
-        if(core.pc + 1 > 255) core.isLoaded = false;
+        if(core.pc + 1 > 255) core.isRunnable = false;
         core.pc = (short) ((core.pc + 1) & bit8_mask);
+        core.mem.setData((short) Memory.SFR.PCL.val, core.pc);
     }
 
     private static void checkZ(int res, Core core) {

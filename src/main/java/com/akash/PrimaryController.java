@@ -4,10 +4,13 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Optional;
 import java.util.Scanner;
+import java.util.Set;
 
 import com.akash.core.Core;
 import com.akash.core.Memory;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -27,7 +30,7 @@ public class PrimaryController {
 
     private Path tempFolderPath = null;
 
-    private final Path pic_as_path = Paths.get("/Applications/microchip/xc8/v2.40/pic-as/bin/pic-as");
+    private Path pic_as_path = Paths.get("/Applications/microchip/xc8/v2.40/pic-as/bin/pic-as");
 
     private void raiseError(String err) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
@@ -111,6 +114,22 @@ public class PrimaryController {
     }
 
     @FXML
+    public void close() {
+        Platform.exit();
+    }
+
+    @FXML
+    public void setPicPath() {
+        TextInputDialog dialog = new TextInputDialog(pic_as_path.toString());
+        dialog.setTitle("pic-as path");
+        dialog.setHeaderText("Give the path for the pic-as assembler.");
+        Optional<String> result = dialog.showAndWait();
+        if (result.isPresent() && !result.get().strip().equals("")) {
+            this.pic_as_path = Paths.get(result.get());
+        }
+    }
+
+    @FXML
     public void load() {
         pic.load(tempFolderPath.toString()+"/temp.hex");
         updateTables();
@@ -147,21 +166,53 @@ public class PrimaryController {
             raiseError("Not loaded");
             return;
         }
+        else if(pic.isRunning) {
+            raiseError("Already Running");
+            return;
+        }
+        if(!pic.isRunnable) {
+            pic.pc = pic.spc;
+            pic.isRunnable = true;
+        }
         pic.step();
         updateTables();
     }
 
     @FXML
     public void run() {
+        if(!pic.isLoaded) {
+            raiseError("Compile and load before running");
+            return;
+        }
+        if(pic.isRunning) {
+            raiseError("Already running");
+            return;
+        }
+        if(!pic.isRunnable) {
+            pic.isRunnable = true;
+            pic.pc = pic.spc;
+        }
         pic.isRunning = true;
         long inTime = System.nanoTime();
-        while (pic.isLoaded) {
-            pic.step();
-        }
-        long outTime = System.nanoTime();
-        updateTables();
-        System.out.println(outTime - inTime);
-        pic.isRunning = false;
+        new Thread(()->{
+            while(pic.isRunnable) {
+                pic.step();
+                updateTables();
+            }
+            pic.isRunning = false;
+            long outTime = System.nanoTime();
+            System.out.println(outTime - inTime);
+        }, "running-thread").start();
     }
 
+    @FXML
+    public void reset() {
+        load();
+    }
+
+    @FXML
+    public void delete() {
+        editor.clear();
+        pic.reset();
+    }
 }

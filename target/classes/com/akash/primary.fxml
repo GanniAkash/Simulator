@@ -9,13 +9,13 @@
            <Menu mnemonicParsing="false" text="File">
                <MenuItem mnemonicParsing="false" onAction="#open" text="Open" />
                <SeparatorMenuItem mnemonicParsing="false" />
-               <MenuItem mnemonicParsing="false" onAction="#close" text="Close" />
+               <MenuItem mnemonicParsing="false" text="Close" />
            </Menu>
            <Menu mnemonicParsing="false" text="Edit">
                <MenuItem mnemonicParsing="false" text="Delete" />
            </Menu>
            <Menu mnemonicParsing="false" text="Settings">
-               <MenuItem mnemonicParsing="false" onAction="#setPicPath" text="Path" />
+               <MenuItem mnemonicParsing="false" text="Path" />
            </Menu>
            <Menu mnemonicParsing="false" text="Help">
                <MenuItem mnemonicParsing="false" text="About" />
@@ -64,7 +64,7 @@
                   <Button mnemonicParsing="false" onAction="#load" text="Load" />
                   <Button mnemonicParsing="false" onAction="#step" text="Step" />
                   <Button mnemonicParsing="false" onAction="#run" text="Run" />
-                  <Button mnemonicParsing="false" onAction="#reset" text="Reset" />
+                  <Button mnemonicParsing="false" text="Reset" />
                   <Button mnemonicParsing="false" text="Delete" />
             </HBox>
          </bottom>
