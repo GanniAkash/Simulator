@@ -25,7 +25,8 @@ public class Executor {
                 int b = ins.getArgs()[1];
                 short temp = core.mem.fetchData(f);
                 int bit_mask = ~(0b01 << b);
-                core.mem.setData(f,(short) (temp & bit_mask));
+                if(f == 3) core.mem.setStatus((short) (temp & bit_mask));
+                else core.mem.setData(f,(short) (temp & bit_mask));
                 break;
             }
             case BSF: {
@@ -33,6 +34,7 @@ public class Executor {
                 int b = ins.getArgs()[1];
                 short temp = core.mem.fetchData(f);
                 int bit_mask = (0b01 << b);
+                if(f == 3) core.mem.setStatus((short) (temp | bit_mask));
                 core.mem.setData(f, (short) (temp | bit_mask));
                 break;
             }
@@ -191,7 +193,8 @@ public class Executor {
             }
             case MOVWF: {
                 short f = ins.getArgs()[0];
-                core.mem.setData(f, core.WReg);
+                if(f == 3) core.mem.setStatus(core.WReg);
+                else core.mem.setData(f, core.WReg);
                 break;
             }
             case MOVF: {
@@ -291,7 +294,7 @@ public class Executor {
             case TRIS: {
                 short f = ins.getArgs()[0];
                 if (f != 6) break;
-                core.mem.setData(f, core.WReg);
+                core.mem.setData((short) 32, core.WReg);
                 break;
             }
             case XORWF: {

@@ -4,6 +4,7 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.Scanner;
 import java.util.Set;
@@ -20,15 +21,47 @@ import javafx.scene.layout.BorderPane;
 import javafx.stage.FileChooser;
 
 public class PrimaryController {
-    @FXML private BorderPane root;
+    @FXML private CheckBox GP0, GP1, GP2, GP3;
     private final Core pic = new Core();
-    @FXML private Tab memTab, dataTab;
     @FXML private TableView<Data> memTable, dataTable;
     @FXML private TextArea editor;
     @FXML private TableColumn<Data, String> progCol, progValCol;
     @FXML private TableColumn<Data, String> dataCol, dataValCol;
 
     private Path tempFolderPath = null;
+
+    private Thread thread;
+
+
+    public short readPort() {
+        short port = 0b1111;
+        if(!GP0.isSelected()) port = (short) (port & 0b1110);
+        if(!GP1.isSelected()) port = (short) (port & 0b1101);
+        if(!GP2.isSelected()) port = (short) (port & 0b1011);
+        if(!GP3.isSelected()) port = (short) (port & 0b0111);
+        return port;
+    }
+
+    public void writePorts() {
+        if((pic.mem.fetchData((short) Memory.SFR.TRISGPIO.val) & 0b1) == 0b1) GP0.setDisable(false);
+        else {
+            GP0.setSelected((pic.mem.fetchGpio() & 0b1) == 0b1);
+            GP0.setDisable(true);
+        }
+        if((pic.mem.fetchData((short) Memory.SFR.TRISGPIO.val) & 0b10) == 0b10) GP1.setDisable(false);
+        else {
+            GP1.setSelected((pic.mem.fetchGpio() & 0b10) == 0b10);
+            GP1.setDisable(true);
+        }
+        if((pic.mem.fetchData((short) Memory.SFR.OPTION.val) & 0b100000) == 0 && (pic.mem.fetchData((short) Memory.SFR.OSCCAL.val) & 0b1) == 0) {
+            if((pic.mem.fetchData((short) Memory.SFR.TRISGPIO.val) & 0b100) == 0b100) GP2.setDisable(false);
+            else {
+                GP2.setSelected((pic.mem.fetchGpio() & 0b100) == 0b100);
+                GP2.setDisable(true);
+            }
+        }
+        GP3.setDisable(false);
+    }
 
     private Path pic_as_path = Paths.get("/Applications/microchip/xc8/v2.40/pic-as/bin/pic-as");
 
@@ -131,6 +164,10 @@ public class PrimaryController {
 
     @FXML
     public void load() {
+        if(pic.isRunning) {
+            raiseError("Already running.");
+            return;
+        }
         pic.load(tempFolderPath.toString()+"/temp.hex");
         updateTables();
         pic.isLoaded = true;
@@ -140,9 +177,10 @@ public class PrimaryController {
         ObservableList<Data> data = FXCollections.observableArrayList();
         data.add(new Data("WReg", Integer.toString(pic.WReg)));
         data.add(new Data("PC", Integer.toString(pic.pc)));
-        for(int i = 0; i<7; i++) {
+        for(int i = 0; i<6; i++) {
             data.add(new Data(Memory.SFR.getSFR(i).toString(), Integer.toHexString(pic.mem.fetchData((short) i))));
         }
+        data.add(new Data(Memory.SFR.GPIO.toString(), Integer.toHexString(pic.mem.fetchGpio())));
         data.add(new Data(Memory.SFR.TRISGPIO.toString(), Integer.toHexString(pic.mem.fetchData((short) Memory.SFR.TRISGPIO.val))));
         data.add(new Data(Memory.SFR.OPTION.toString(), Integer.toHexString(pic.mem.fetchData((short) Memory.SFR.OPTION.val))));
         for (int i = 0x10; i<32; i++) {
@@ -167,8 +205,17 @@ public class PrimaryController {
             return;
         }
         else if(pic.isRunning) {
-            raiseError("Already Running");
+            raiseError("Already Running.");
             return;
+        }
+        if(thread != null) {
+            try {
+                thread.join();
+                thread = null;
+            }
+            catch(InterruptedException e) {
+                System.out.println(Arrays.toString(e.getStackTrace()));
+            }
         }
         if(!pic.isRunnable) {
             pic.pc = pic.spc;
@@ -180,13 +227,23 @@ public class PrimaryController {
 
     @FXML
     public void run() {
+
         if(!pic.isLoaded) {
             raiseError("Compile and load before running");
             return;
         }
         if(pic.isRunning) {
-            raiseError("Already running");
+            raiseError("Already running.");
             return;
+        }
+        if(thread != null) {
+            try {
+                thread.join();
+                thread = null;
+            }
+            catch(InterruptedException e) {
+                System.out.println(Arrays.toString(e.getStackTrace()));
+            }
         }
         if(!pic.isRunnable) {
             pic.isRunnable = true;
@@ -194,7 +251,7 @@ public class PrimaryController {
         }
         pic.isRunning = true;
         long inTime = System.nanoTime();
-        new Thread(()->{
+        thread = new Thread(()->{
             while(pic.isRunnable) {
                 pic.step();
                 updateTables();
@@ -202,17 +259,33 @@ public class PrimaryController {
             pic.isRunning = false;
             long outTime = System.nanoTime();
             System.out.println(outTime - inTime);
-        }, "running-thread").start();
+        }, "running-thread");
+        thread.start();
     }
 
     @FXML
     public void reset() {
+        if(pic.isRunning) {
+            pic.isRunnable = false;
+            try {
+                thread.join();
+                thread = null;
+            }
+            catch(InterruptedException e) {
+                System.out.println(Arrays.toString(e.getStackTrace()));
+            }
+        }
         load();
     }
 
     @FXML
     public void delete() {
+        if(pic.isRunning) {
+            raiseError("Already running.");
+            return;
+        }
         editor.clear();
         pic.reset();
+        updateTables();
     }
 }

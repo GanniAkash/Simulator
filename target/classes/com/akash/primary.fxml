@@ -1,71 +1,110 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.*?>
+<?import java.lang.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<BorderPane fx:id="root" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="950.0" stylesheets="@application.css" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.akash.PrimaryController">
+<BorderPane fx:id="root" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="950.0" stylesheets="@application.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.akash.PrimaryController">
    <top>
        <MenuBar BorderPane.alignment="CENTER">
-           <Menu mnemonicParsing="false" text="File">
-               <MenuItem mnemonicParsing="false" onAction="#open" text="Open" />
-               <SeparatorMenuItem mnemonicParsing="false" />
-               <MenuItem mnemonicParsing="false" text="Close" />
-           </Menu>
-           <Menu mnemonicParsing="false" text="Edit">
-               <MenuItem mnemonicParsing="false" text="Delete" />
-           </Menu>
-           <Menu mnemonicParsing="false" text="Settings">
-               <MenuItem mnemonicParsing="false" text="Path" />
-           </Menu>
-           <Menu mnemonicParsing="false" text="Help">
-               <MenuItem mnemonicParsing="false" text="About" />
-           </Menu>
+          <menus>
+              <Menu mnemonicParsing="false" text="File">
+                 <items>
+                     <MenuItem mnemonicParsing="false" onAction="#open" text="Open" />
+                     <SeparatorMenuItem mnemonicParsing="false" />
+                     <MenuItem mnemonicParsing="false" onAction="#close" text="Close" />
+                 </items>
+              </Menu>
+              <Menu mnemonicParsing="false" text="Edit">
+                 <items>
+                     <MenuItem mnemonicParsing="false" text="Delete" />
+                 </items>
+              </Menu>
+              <Menu mnemonicParsing="false" text="Settings">
+                 <items>
+                     <MenuItem mnemonicParsing="false" onAction="#setPicPath" text="Path" />
+                 </items>
+              </Menu>
+              <Menu mnemonicParsing="false" text="Help">
+                 <items>
+                     <MenuItem mnemonicParsing="false" text="About" />
+                 </items>
+              </Menu>
+          </menus>
        </MenuBar>
    </top>
    <left>
        <TabPane prefHeight="200.0" prefWidth="335.0" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
-           <Tab fx:id="memTab" text="Program Mem">
-               <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-               <children>
-                  <TableView fx:id="memTable" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                    <columns>
-                      <TableColumn fx:id="progCol" prefWidth="75.0" text="Prog Addr" />
-                      <TableColumn fx:id="progValCol" prefWidth="75.0" text="Value" />
-                    </columns>
-                     <columnResizePolicy>
-                        <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
-                     </columnResizePolicy>
-                  </TableView>
-               </children>
-               </AnchorPane>
-           </Tab>
-           <Tab fx:id="dataTab" text="Data Memory">
-               <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-               <children>
-                  <TableView fx:id="dataTable" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                    <columns>
-                      <TableColumn fx:id="dataCol" prefWidth="75.0" text="File Addr" />
-                      <TableColumn fx:id="dataValCol" prefWidth="75.0" text="Value" />
-                    </columns>
-                     <columnResizePolicy>
-                        <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
-                     </columnResizePolicy>
-                  </TableView>
-               </children>
-               </AnchorPane>
-           </Tab>
+          <tabs>
+              <Tab fx:id="memTab" text="Program Mem">
+                 <content>
+                     <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                     <children>
+                        <TableView fx:id="memTable" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                          <columns>
+                            <TableColumn fx:id="progCol" prefWidth="75.0" text="Prog Addr" />
+                            <TableColumn fx:id="progValCol" prefWidth="75.0" text="Value" />
+                          </columns>
+                           <columnResizePolicy>
+                              <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                           </columnResizePolicy>
+                        </TableView>
+                     </children>
+                     </AnchorPane>
+                 </content>
+              </Tab>
+              <Tab fx:id="dataTab" text="Data Memory">
+                 <content>
+                     <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                     <children>
+                        <TableView fx:id="dataTable" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                          <columns>
+                            <TableColumn fx:id="dataCol" prefWidth="75.0" text="File Addr" />
+                            <TableColumn fx:id="dataValCol" prefWidth="75.0" text="Value" />
+                          </columns>
+                           <columnResizePolicy>
+                              <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                           </columnResizePolicy>
+                        </TableView>
+                     </children>
+                     </AnchorPane>
+                 </content>
+              </Tab>
+            <Tab text="I/O">
+              <content>
+                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                     <children>
+                        <VBox prefHeight="200.0" prefWidth="100.0" spacing="50.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                           <children>
+                              <CheckBox fx:id="GP0" mnemonicParsing="false" text="GP0" />
+                              <CheckBox fx:id="GP1" mnemonicParsing="false" text="GP1" />
+                              <CheckBox fx:id="GP2" mnemonicParsing="false" text="GP2" />
+                              <CheckBox fx:id="GP3" mnemonicParsing="false" text="GP3" />
+                           </children>
+                           <padding>
+                              <Insets bottom="50.0" left="50.0" right="50.0" top="50.0" />
+                           </padding>
+                        </VBox>
+                     </children>
+                  </AnchorPane>
+              </content>
+            </Tab>
+          </tabs>
        </TabPane>
    </left>
    <center>
       <BorderPane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
          <bottom>
             <HBox alignment="CENTER" prefHeight="40.0" prefWidth="200.0" spacing="42.0" BorderPane.alignment="CENTER">
-                <Button mnemonicParsing="false" onAction="#compile" text="Compile" />
-                  <Button mnemonicParsing="false" onAction="#load" text="Load" />
-                  <Button mnemonicParsing="false" onAction="#step" text="Step" />
-                  <Button mnemonicParsing="false" onAction="#run" text="Run" />
-                  <Button mnemonicParsing="false" text="Reset" />
-                  <Button mnemonicParsing="false" text="Delete" />
+               <children>
+                   <Button mnemonicParsing="false" onAction="#compile" text="Compile" />
+                     <Button mnemonicParsing="false" onAction="#load" text="Load" />
+                     <Button mnemonicParsing="false" onAction="#step" text="Step" />
+                     <Button mnemonicParsing="false" onAction="#run" text="Run" />
+                     <Button mnemonicParsing="false" onAction="#reset" text="Reset" />
+                     <Button mnemonicParsing="false" onAction="#delete" text="Delete" />
+               </children>
             </HBox>
          </bottom>
          <center>
