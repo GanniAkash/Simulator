@@ -3,9 +3,15 @@ package com.akash.core;
 public class Core {
     public short pc, spc;
     public short WReg;
-    protected int clk;
+    public int clk, wdt;
+
+    public int mclrStart = -1;
+    public boolean mclre;
+
+    public double freq = 4; // GHz
     public Memory mem;
     public boolean isRunning;
+
     public boolean isLoaded, isRunnable;
 
     public Core () {
@@ -25,7 +31,6 @@ public class Core {
         isRunning = false;
         isLoaded = false;
     }
-
     public void load(String pathToHex) {
         pc = Parser.parse(pathToHex, mem);
         spc = pc;
@@ -38,6 +43,11 @@ public class Core {
         Executor.execute(instruction, this);
         if(pc > 255) {
             pc = (short) (pc & 0b1111_1111);
+        }
+        if(mclre && mclrStart != -1 && clk > ((18 * freq * (10^3)) + mclrStart)) {
+            isRunnable = false;
+            mclrStart = -1;
+            reset();
         }
     }
 }

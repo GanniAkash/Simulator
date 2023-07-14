@@ -23,7 +23,20 @@
               </Menu>
               <Menu mnemonicParsing="false" text="Settings">
                  <items>
+                  <Menu mnemonicParsing="false" text="Configuration Bits">
+                     <items>
+                        <CheckMenuItem fx:id="MCLRE" mnemonicParsing="false" onAction="#MCLREUpdate" text="MCLRE" />
+                        <CheckMenuItem mnemonicParsing="false" text="WDTE" />
+                        <CheckMenuItem mnemonicParsing="false" text="CP" />
+                     </items>
+                  </Menu>
                      <MenuItem mnemonicParsing="false" onAction="#setPicPath" text="Path" />
+                  <SeparatorMenuItem mnemonicParsing="false" />
+                  <CustomMenuItem mnemonicParsing="false" text="Freuquency">
+                     <content>
+                        <Slider fx:id="freqSlider" blockIncrement="0.2" max="16.0" min="4.0" onDragDetected="#changeFreq" value="8.0" />
+                     </content>
+                  </CustomMenuItem>
                  </items>
               </Menu>
               <Menu mnemonicParsing="false" text="Help">
@@ -31,6 +44,16 @@
                      <MenuItem mnemonicParsing="false" text="About" />
                  </items>
               </Menu>
+            <Menu fx:id="clkText" disable="true" mnemonicParsing="false" text="Clk: ">
+               <items>
+                  <MenuItem mnemonicParsing="false" onAction="#open" text="Open" />
+                  <SeparatorMenuItem mnemonicParsing="false" />
+                  <MenuItem mnemonicParsing="false" onAction="#close" text="Close" />
+               </items>
+               <graphic>
+                  <Separator prefHeight="9.0" prefWidth="643.0" />
+               </graphic>
+            </Menu>
           </menus>
        </MenuBar>
    </top>
@@ -79,8 +102,8 @@
                            <children>
                               <CheckBox fx:id="GP0" mnemonicParsing="false" text="GP0" />
                               <CheckBox fx:id="GP1" mnemonicParsing="false" text="GP1" />
-                              <CheckBox fx:id="GP2" mnemonicParsing="false" text="GP2" />
-                              <CheckBox fx:id="GP3" mnemonicParsing="false" text="GP3" />
+                              <CheckBox fx:id="GP2" mnemonicParsing="false" onAction="#GP2Update" text="GP2" />
+                              <CheckBox fx:id="GP3" mnemonicParsing="false" onAction="#GP3Update" text="GP3" />
                            </children>
                            <padding>
                               <Insets bottom="50.0" left="50.0" right="50.0" top="50.0" />

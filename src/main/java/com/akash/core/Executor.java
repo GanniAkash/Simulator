@@ -317,10 +317,27 @@ public class Executor {
                 core.WReg = res;
                 break;
             }
-            case CLRWDT:
-            case SLEEP:
+            case CLRWDT: {
+                core.wdt = 0;
+                if((core.mem.fetchData((short) Memory.SFR.OPTION.val) & 0b1000) == 0b1000) {
+                    core.mem.setData((short) Memory.SFR.OPTION.val, (short) (core.mem.fetchData((short) Memory.SFR.OPTION.val) & 0b1111_1000));
+                }
+                core.mem.setStatus((short) (core.mem.fetchData((short) Memory.SFR.STATUS.val) | 0b0001_1000));
+                break;
+            }
+            case SLEEP: {
+                core.wdt = 0;
+                core.mem.setData((short) Memory.SFR.OPTION.val, (short) (core.mem.fetchData((short) Memory.SFR.OPTION.val) & 0b1111_1000));
+                core.mem.setStatus((short) (core.mem.fetchData((short) Memory.SFR.STATUS.val) | 0b0001_1000));
+                break;
+            }
             default: break;
         }
+        if((core.mem.fetchData((short) Memory.SFR.OPTION.val)  & 0b100000) == 0) {
+            if(op == Instruction.OpCode.RETLW || op == Instruction.OpCode.GOTO || op == Instruction.OpCode.CALL) core.clk += 2;
+            else core.clk += 1;
+        }
+        core.mem.setData((short) Memory.SFR.TMR0.val, (short) (core.clk & bit8_mask));
         if(core.pc + 1 > 255) core.isRunnable = false;
         core.pc = (short) ((core.pc + 1) & bit8_mask);
         core.mem.setData((short) Memory.SFR.PCL.val, core.pc);

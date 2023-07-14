@@ -22,6 +22,12 @@ import javafx.stage.FileChooser;
 
 public class PrimaryController {
     @FXML private CheckBox GP0, GP1, GP2, GP3;
+
+    @FXML private CheckMenuItem MCLRE;
+
+    @FXML private Slider freqSlider;
+
+    @FXML private Menu clkText;
     private final Core pic = new Core();
     @FXML private TableView<Data> memTable, dataTable;
     @FXML private TextArea editor;
@@ -148,6 +154,16 @@ public class PrimaryController {
 
     @FXML
     public void close() {
+        pic.isRunnable = false;
+        if(thread != null) {
+            try {
+                thread.join();
+                thread = null;
+            }
+            catch(InterruptedException e) {
+                System.out.println(Arrays.toString(e.getStackTrace()));
+            }
+        }
         Platform.exit();
     }
 
@@ -220,8 +236,10 @@ public class PrimaryController {
         if(!pic.isRunnable) {
             pic.pc = pic.spc;
             pic.isRunnable = true;
+            MCLRE.setDisable(true);
         }
         pic.step();
+        clkText.setText("Clk: " + pic.clk);
         updateTables();
     }
 
@@ -252,8 +270,12 @@ public class PrimaryController {
         pic.isRunning = true;
         long inTime = System.nanoTime();
         thread = new Thread(()->{
+            MCLRE.setDisable(true);
             while(pic.isRunnable) {
                 pic.step();
+                Platform.runLater(() -> {
+                    clkText.setText("Clk: " + pic.clk);
+                });
                 updateTables();
             }
             pic.isRunning = false;
@@ -275,6 +297,7 @@ public class PrimaryController {
                 System.out.println(Arrays.toString(e.getStackTrace()));
             }
         }
+        MCLRE.setDisable(false);
         load();
     }
 
@@ -286,6 +309,29 @@ public class PrimaryController {
         }
         editor.clear();
         pic.reset();
+        MCLRE.setDisable(false);
         updateTables();
+    }
+
+    @FXML void GP2Update() {
+        if((pic.mem.fetchData((short) Memory.SFR.OPTION.val) & 0b100000) == 0b100000 && (pic.mem.fetchData((short) Memory.SFR.OSCCAL.val) & 0b1) == 0) {
+            if((pic.mem.fetchData((short) Memory.SFR.OPTION.val) & 0b10000) == 0 && GP2.isSelected()) pic.clk += 1;
+            else if((pic.mem.fetchData((short) Memory.SFR.OPTION.val) & 0b10000) == 0b10000 && !GP2.isSelected()) pic.clk += 1;
+            clkText.setText("Clk: "+ pic.clk);
+        }
+    }
+
+    @FXML void MCLREUpdate() {
+        pic.mclre = MCLRE.isSelected();
+    }
+
+    @FXML void GP3Update() {
+        if(MCLRE.isSelected() && GP3.isSelected()) {
+            pic.mclrStart = pic.clk;
+        }
+    }
+
+    @FXML void changeFreq() {
+        pic.freq = freqSlider.getValue();
     }
 }
